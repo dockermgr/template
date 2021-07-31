@@ -44,7 +44,7 @@ __options "$@"
 # Begin installer
 APPDIR="$SHARE/CasjaysDev/dockermgr/$APPNAME"
 INSTDIR="$SHARE/CasjaysDev/dockermgr/$APPNAME"
-DATADIR="${DOCKERMGR_HOME:-/srv/docker/$APPNAME}"
+DATADIR="${DOCKERMGR_HOME:-/srv/docker}/$APPNAME"
 DOCKER_HUB_URL="template"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 sudo mkdir -p "$DATADIR"/{data}
