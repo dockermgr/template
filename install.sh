@@ -42,10 +42,13 @@ system_install
 __options "$@"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Begin installer
-APPDIR="$SHARE/CasjaysDev/dockermgr/$APPNAME"
-INSTDIR="$SHARE/CasjaysDev/dockermgr/$APPNAME"
-DATADIR="${DOCKERMGR_HOME:-/srv/docker}/$APPNAME"
+APPNAME="${APPNAME:-template}"
 DOCKER_HUB_URL="template"
+APPDIR="/usr/local/share/docker/$APPNAME"
+INSTDIR="/usr/local/share/CasjaysDev/$SCRIPTS_PREFIX/$APPNAME"
+DATADIR="/srv/docker/$APPNAME"
+REPORAW="$REPO/raw/$REPO_BRANCH"
+APPVERSION="$(__appversion "$REPORAW/version.txt")"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 sudo mkdir -p "$DATADIR"/{data}
 sudo chmod -Rf 777 "$DATADIR"
