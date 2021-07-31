@@ -1,6 +1,6 @@
 # Welcome to dockermgr template installer 👋
 
-## to install
+## To install
 
 ```shell
 dockermgr install template
