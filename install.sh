@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-APPNAME="$(basename "$0")"
+APPNAME="$(basename "$(dirname $PWD/install.sh)")"
 VERSION="202107311147-git"
 USER="${SUDO_USER:-${USER}}"
 HOME="${USER_HOME:-${HOME}}"
@@ -18,9 +18,9 @@ SRC_DIR="${BASH_SOURCE%/*}"
 # @Created       : Saturday, Jul 31, 2021 11:47 EDT
 # @File          : template
 # @Description   : Template for dockermgr
-# @TODO          : 
-# @Other         : 
-# @Resource      : 
+# @TODO          :
+# @Other         :
+# @Resource      :
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Import functions
 CASJAYSDEVDIR="${CASJAYSDEVDIR:-/usr/local/share/CasjaysDev/scripts}"
@@ -41,8 +41,7 @@ fi
 system_install
 __options "$@"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Begin installer 
-APPNAME="template"
+# Begin installer
 DATADIR="${DOCKERMGR_HOME:-/srv/docker/$APPNAME}"
 DOCKER_HUB_URL="template"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
