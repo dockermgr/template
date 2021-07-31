@@ -17,7 +17,7 @@ SRC_DIR="${BASH_SOURCE%/*}"
 # @Copyright     : Copyright: (c) 2021 casjay, casjay
 # @Created       : Saturday, Jul 31, 2021 11:47 EDT
 # @File          : template
-# @Description   : Template for dockermgr
+# @Description   : template docker container installer
 # @TODO          :
 # @Other         :
 # @Resource      :
@@ -38,21 +38,25 @@ else
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # user system devenv dfmgr dockermgr fontmgr iconmgr pkmgr systemmgr thememgr wallpapermgr
-system_install
+dockermgr_install
 __options "$@"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Begin installer
-APPNAME="${APPNAME:-template}"
-DOCKER_HUB_URL="template"
-APPDIR="${APPDIR:-/usr/local/share/docker/$APPNAME}"
+APPNAME="template"
+DOCKER_HUB_URL="template/template:latest"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+APPDIR="${APPDIR:-/usr/local/share/CasjaysDev/$SCRIPTS_PREFIX/$APPNAME}"
 INSTDIR="${INSTDIR:-/usr/local/share/CasjaysDev/$SCRIPTS_PREFIX/$APPNAME}"
 DATADIR="${DATADIR:-/srv/docker/$APPNAME}"
-REPORAW="$REPO/raw/$REPO_BRANCH"
+REPORAW="$REPO/raw/$GIT_DEFAULT_BRANCH"
 APPVERSION="$(__appversion "$REPORAW/version.txt")"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 sudo mkdir -p "$DATADIR"/{data}
 sudo chmod -Rf 777 "$DATADIR"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+if [ -f "$INSTDIR/docker-compose.yml" ]; then
+  cd "$INSTDIR" && docker-compose up -d
+else
 if docker ps -a | grep "$APPNAME" >/dev/null 2>&1; then
   sudo docker pull "$DOCKER_HUB_URL"
   sudo docker restart "$APPNAME"
@@ -60,11 +64,19 @@ else
   sudo docker run -d \
     --name="$APPNAME" \
     --hostname "$APPNAME" \
-    --restart=always \
+    --restart=unless-stopped \
     --privileged \
-    -p 4040:80 \
-    -v "$DATADIR/data":/"$APPNAME/data" \
+    -e TZ=${TIMEZONE:-America/New_York} \
+    -v "$DATADIR/data":/data:z \
+    -p 8001:80 \
     "$DOCKER_HUB_URL"
+fi
+fi
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+if docker ps -a | grep "$APPNAME" >/dev/null 2>&1; then
+  printf_green "Successfully setup template"
+else
+  printf_return "Could not setup template"
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # End script
