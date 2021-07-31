@@ -44,9 +44,9 @@ __options "$@"
 # Begin installer
 APPNAME="${APPNAME:-template}"
 DOCKER_HUB_URL="template"
-APPDIR="/usr/local/share/docker/$APPNAME"
-INSTDIR="/usr/local/share/CasjaysDev/$SCRIPTS_PREFIX/$APPNAME"
-DATADIR="/srv/docker/$APPNAME"
+APPDIR="${APPDIR:-/usr/local/share/docker/$APPNAME}"
+INSTDIR="${INSTDIR:-/usr/local/share/CasjaysDev/$SCRIPTS_PREFIX/$APPNAME}"
+DATADIR="${DATADIR:-/srv/docker/$APPNAME}"
 REPORAW="$REPO/raw/$REPO_BRANCH"
 APPVERSION="$(__appversion "$REPORAW/version.txt")"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -63,7 +63,7 @@ else
     --restart=always \
     --privileged \
     -p 4040:80 \
-    -v "$DATADIR/data":/airsonic/data:z \
+    -v "$DATADIR/data":/"$APPNAME/data" \
     "$DOCKER_HUB_URL"
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
