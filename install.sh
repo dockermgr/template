@@ -66,23 +66,23 @@ APPVERSION="$(__appversion "$REPORAW/version.txt")"
 GEN_SCRIPT_REPLACE_ENV_SERVER_PORT="${GEN_SCRIPT_REPLACE_ENV_SERVER_PORT:-15050}"
 GEN_SCRIPT_REPLACE_ENV_SERVER_HOST="${GEN_SCRIPT_REPLACE_ENV_SERVER_HOST:-$(hostname -f 2>/dev/null)}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-sudo mkdir -p "$DATADIR/data"
-sudo mkdir -p "$DATADIR/config"
-sudo chmod -Rf 777 "$DATADIR"
+__sudo mkdir -p "$DATADIR/data"
+__sudo mkdir -p "$DATADIR/config"
+__sudo chmod -Rf 777 "$DATADIR"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if [ -f "$INSTDIR/docker-compose.yml" ] && cmd_exists docker-compose; then
   printf_blue "Installing containers using docker compose"
   sed -i "s|REPLACE_DATADIR|$DATADIR" "$INSTDIR/docker-compose.yml"
   if cd "$INSTDIR"; then
-    sudo docker-compose pull &>/dev/null
-    sudo docker-compose up -d &>/dev/null
+    __sudo docker-compose pull &>/dev/null
+    __sudo docker-compose up -d &>/dev/null
   fi
 else
   if docker ps -a | grep -qsw "$APPNAME"; then
-    sudo docker pull "$DOCKER_HUB_URL" &>/dev/null
-    sudo docker restart "$APPNAME" &>/dev/null
+    __sudo docker pull "$DOCKER_HUB_URL" &>/dev/null
+    __sudo docker restart "$APPNAME" &>/dev/null
   else
-    sudo docker run -d \
+    __sudo docker run -d \
       --name="$APPNAME" \
       --hostname "$APPNAME" \
       --restart=unless-stopped \
