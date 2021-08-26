@@ -48,6 +48,8 @@ APPNAME="template"
 DOCKER_HUB_URL="template/template:latest"
 TEMPLATE_SERVER_PORT="${TEMPLATE_SERVER_PORT:-15050}"
 TEMPLATE_SERVER_HOST="${TEMPLATE_SERVER_HOST:-$(hostname -f 2>/dev/null)}"
+REPO="${DOCKERMGRREPO:-https://github.com/dockermgr}/$APPNAME"
+REPO_BRANCH="${GIT_REPO_BRANCH:-master}"
 TEMPLATE_SERVER_TIMEZONE="${TZ:-${TIMEZONE:-America/New_York}}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if user_is_root; then
@@ -59,12 +61,8 @@ else
   INSTDIR="$HOME/.local/share/CasjaysDev/$SCRIPTS_PREFIX/$APPNAME"
   DATADIR="$HOME/.local/share/srv/docker/$APPNAME"
 fi
-REPO_BRANCH="${GIT_REPO_BRANCH:-master}"
-REPO="${DOCKERMGRREPO:-https://github.com/dockermgr}/$APPNAME"
 REPORAW="$REPO/raw/$REPO_BRANCH"
 APPVERSION="$(__appversion "$REPORAW/version.txt")"
-GEN_SCRIPT_REPLACE_ENV_SERVER_PORT="${GEN_SCRIPT_REPLACE_ENV_SERVER_PORT:-15050}"
-GEN_SCRIPT_REPLACE_ENV_SERVER_HOST="${GEN_SCRIPT_REPLACE_ENV_SERVER_HOST:-$(hostname -f 2>/dev/null)}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __sudo mkdir -p "$DATADIR/data"
 __sudo mkdir -p "$DATADIR/config"
