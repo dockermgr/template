@@ -45,7 +45,7 @@ __sudo() { if sudo -n true; then eval sudo "$*"; else eval "$*"; fi; }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Begin installer
 APPNAME="template"
-DOCKER_HUB_URL="template/template:latest"
+DOCKER_HUB_URL="template/template"
 TEMPLATE_SERVER_PORT="${TEMPLATE_SERVER_PORT:-15050}"
 TEMPLATE_SERVER_HOST="${TEMPLATE_SERVER_HOST:-$(hostname -f 2>/dev/null)}"
 REPO="${DOCKERMGRREPO:-https://github.com/dockermgr}/$APPNAME"
