@@ -45,18 +45,31 @@ __options "$@"
 # Begin installer
 APPNAME="template"
 DOCKER_HUB_URL="template/template:latest"
+TEMPLATE_SERVER_PORT="${TEMPLATE_SERVER_PORT:-15050}"
+TEMPLATE_SERVER_HOST="${TEMPLATE_SERVER_HOST:-$(hostname -f 2>/dev/null)}"
+TEMPLATE_SERVER_TIMEZONE="${TZ:-${TIMEZONE:-America/New_York}}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-APPDIR="/usr/local/share/CasjaysDev/$SCRIPTS_PREFIX/$APPNAME"
-INSTDIR="/usr/local/share/CasjaysDev/$SCRIPTS_PREFIX/$APPNAME"
-DATADIR="/srv/docker/$APPNAME"
-REPORAW="$REPO/raw/$GIT_DEFAULT_BRANCH"
+if user_is_root; then
+  APPDIR="$CASJAYSDEVDIR/$SCRIPTS_PREFIX/$APPNAME"
+  INSTDIR="$CASJAYSDEVDIR/$SCRIPTS_PREFIX/$APPNAME"
+  DATADIR="/srv/docker/$APPNAME"
+else
+  APPDIR="$HOME/.local/share/CasjaysDev/$SCRIPTS_PREFIX/$APPNAME"
+  INSTDIR="$HOME/.local/share/CasjaysDev/$SCRIPTS_PREFIX/$APPNAME"
+  DATADIR="$HOME/.local/share/srv/docker/$APPNAME"
+fi
+REPO_BRANCH="${GIT_REPO_BRANCH:-master}"
+REPO="${DOCKERMGRREPO:-https://github.com/dockermgr}/$APPNAME"
+REPORAW="$REPO/raw/$REPO_BRANCH"
 APPVERSION="$(__appversion "$REPORAW/version.txt")"
-TIMEZONE="${TZ:-$TIMEZONE}"
+GEN_SCRIPT_REPLACE_ENV_SERVER_PORT="${GEN_SCRIPT_REPLACE_ENV_SERVER_PORT:-15050}"
+GEN_SCRIPT_REPLACE_ENV_SERVER_HOST="${GEN_SCRIPT_REPLACE_ENV_SERVER_HOST:-$(hostname -f 2>/dev/null)}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-sudo mkdir -p "$DATADIR"/{data}
+sudo mkdir -p "$DATADIR/data"
+sudo mkdir -p "$DATADIR/config"
 sudo chmod -Rf 777 "$DATADIR"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-if [ -f "$INSTDIR/docker-compose.yml" ]; then
+if [ -f "$INSTDIR/docker-compose.yml" ] && cmd_exists docker-compose; then
   printf_blue "Installing containers using docker compose"
   sed -i "s|REPLACE_DATADIR|$DATADIR" "$INSTDIR/docker-compose.yml"
   if cd "$INSTDIR"; then
@@ -64,24 +77,25 @@ if [ -f "$INSTDIR/docker-compose.yml" ]; then
     sudo docker-compose up -d &>/dev/null
   fi
 else
-if docker ps -a | grep -qs "$APPNAME"; then
-  sudo docker pull "$DOCKER_HUB_URL" &>/dev/null
-  sudo docker restart "$APPNAME" &>/dev/null
-else
-  sudo docker run -d \
-    --name="$APPNAME" \
-    --hostname "$APPNAME" \
-    --restart=unless-stopped \
-    --privileged \
-    -e TZ=${TIMEZONE:-America/New_York} \
-    -v "$DATADIR/data":/data:z \
-    -p 8001:80 \
-    "$DOCKER_HUB_URL" &>/dev/null
-fi
+  if docker ps -a | grep -qsw "$APPNAME"; then
+    sudo docker pull "$DOCKER_HUB_URL" &>/dev/null
+    sudo docker restart "$APPNAME" &>/dev/null
+  else
+    sudo docker run -d \
+      --name="$APPNAME" \
+      --hostname "$APPNAME" \
+      --restart=unless-stopped \
+      --privileged \
+      -e TZ="$TEMPLATE_SERVER_TIMEZONE" \
+      -v "$DATADIR/data":/data:z \
+      -v "$DATADIR/config":/config:z \
+      -p "$TEMPLATE_SERVER_PORT":80 \
+      "$DOCKER_HUB_URL" &>/dev/null
+  fi
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if docker ps -a | grep -qs "$APPNAME"; then
-  printf_blue "Service is available at: http://$HOSTNAME:8001"
+  printf_blue "Service is available at: http://$TEMPLATE_SERVER_HOST:$TEMPLATE_SERVER_PORT"
 else
   false
 fi
