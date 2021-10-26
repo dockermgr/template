@@ -75,9 +75,11 @@ SERVER_PORT_SSL_INT="${SERVER_PORT_SSL_INT:-443}"
 SERVER_PORT_ADMIN="${SERVER_PORT_SSL:-16000}"
 SERVER_PORT_ADMIN_INT="${SERVER_PORT_SSL_INT:-8080}"
 SERVER_TIMEZONE="${TZ:-${TIMEZONE:-America/New_York}}"
-SERVER_SSL="${SERVER_SSL:-false}"
 SERVER_SSL_CRT="/etc/ssl/CA/CasjaysDev/certs/localhost.crt"
 SERVER_SSL_KEY="/etc/ssl/CA/CasjaysDev/private/localhost.key"
+[[ -f "$SERVER_SSL_CRT" ]] && [[ -f "$SERVER_SSL_KEY" ]] && SERVER_SSL="true"
+[[ -n "$SERVER_SSL" ]] || SERVER_SSL="${SERVER_SSL:-false}"
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Require a version higher than
 dockermgr_req_version "$APPVERSION"
@@ -175,6 +177,16 @@ fi
 # run post install scripts
 run_postinst() {
   dockermgr_run_post
+  if ! grep -sq "$SERVER_HOST" /etc/hosts; then
+    if [[ -n "$SERVER_PORT_INT" ]]; then
+      if [[ $(hostname -d 2>/dev/null | grep '^') = 'local' ]]; then
+        echo "$SERVER_LISTEN     $APPNAME.local" | sudo tee -a /etc/hosts &>/dev/null
+      else
+        echo "$SERVER_LISTEN     $APPNAME.local" | sudo tee -a /etc/hosts &>/dev/null
+        echo "$SERVER_LISTEN     $SERVER_HOST" | sudo tee -a /etc/hosts &>/dev/null
+      fi
+    fi
+  fi
 }
 #
 execute "run_postinst" "Running post install scripts"
