@@ -34,6 +34,7 @@ SERVER_TIMEZONE="${TZ:-${TIMEZONE:-America/New_York}}"
 # Setup nginx proxy variables
 NGINX_HTTP="${NGINX_HTTP:-80}"
 NGINX_HTTPS="${NGINX_HTTPS:-443}"
+NGINX_PORT="${NGINX_HTTPS:-$NGINX_HTTP}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Port Setup [ _INT is container port ]
 SERVER_PORT="${SERVER_PORT:-}"
