@@ -65,62 +65,20 @@ __port_not_in_use() { [[ -d "/etc/nginx/vhosts.d" ]] && grep -wRsq "${1:-$SERVER
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Make sure the scripts repo is installed
 scripts_check
-REPO_BRANCH="${GIT_REPO_BRANCH:-main}"
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Defaults
-APPNAME="template-file"
-APPDIR="$HOME/.local/share/srv/docker/template-file"
-DATADIR="$HOME/.local/share/srv/docker/template-file/files"
-INSTDIR="$HOME/.local/share/dockermgr/template-file"
-REPO="${DOCKERMGRREPO:-https://github.com/dockermgr}/template-file"
-REPORAW="$REPO/raw/$REPO_BRANCH"
-APPVERSION="$(__appversion "$REPORAW/version.txt")"
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# URL to container image [docker pull URL]
-HUB_URL="REPLACE_HUB_URL"
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Directory variables
-SERVER_DATA_DIR=""
-SERVER_CONFIG_DIR=""
-LOCAL_DATA_DIR="$DATADIR/data"
-LOCAL_CONFIG_DIR="$DATADIR/config"
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Setup variables
-NGINX_HTTP="${NGINX_HTTP:-80}"
-NGINX_HTTPS="${NGINX_HTTPS:-443}"
-SERVER_IP="${CURRIP4:-127.0.0.1}"
-SERVER_LISTEN="${SERVER_LISTEN:-$SERVER_IP}"
-SERVER_HOST="${APPNAME}.$(hostname -d 2>/dev/null | grep '^' || echo local)"
-SERVER_TIMEZONE="${TZ:-${TIMEZONE:-America/New_York}}"
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Port Setup [ _INT is container port ]
-SERVER_PORT="${SERVER_PORT:-}"
-SERVER_PORT_INT="${SERVER_PORT_INT:-}"
-SERVER_PORT_ADMIN="${SERVER_PORT_ADMIN:-}"
-SERVER_PORT_ADMIN_INT="${SERVER_PORT_ADMIN_INT:-}"
-SERVER_PORT_OTHER="${SERVER_PORT_OTHER:-}"
-SERVER_PORT_OTHER_INT="${SERVER_PORT_OTHER_INT:-}"
-SERVER_WEB_PORT="${SERVER_WEB_PORT:-$SERVER_PORT}"
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# SSL Setup
-SERVER_SSLDIR="${SERVER_SSLDIR:-/etc/ssl/CA/CasjaysDev}"
-SERVER_SSL_CA="${SERVER_SSL_CA:-$SERVER_SSLDIR/certs/ca.crt}"
-SERVER_SSL_CRT="${SERVER_SSL_CRT:-$SERVER_SSLDIR/certs/localhost.crt}"
-SERVER_SSL_KEY="${SERVER_SSL_KEY:-$SERVER_SSLDIR/private/localhost.key}"
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Override global variables
-[[ -f "$DOCKERMGR_HOME/env" ]] && . "$DOCKERMGR_HOME/env"
-[[ -f "$APPDIR/env" ]] && . "$APPDIR/env"
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Show user info message
-SERVER_MESSAGE_USER=""
-SERVER_MESSAGE_PASS=""
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Show post install message
-SERVER_MESSAGE_POST=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Require a higher version
 dockermgr_req_version "$APPVERSION"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# import global variables
+if [[ -f "$APPDIR/env.sh" ]] && [[ ! -f "$DOCKERMGR_HOME/env/$APPNAME" ]]; then
+  mkdir -p "$DOCKERMGR_HOME/env"
+  cp -f "$APPDIR/env.sh" "$DOCKERMGR_HOME/env/$APPNAME"
+  . "$DOCKERMGR_HOME/env/$APPNAME"
+elif [[ -f "$DOCKERMGR_HOME/env/$APPNAME" ]]; then
+  . "$DOCKERMGR_HOME/env/$APPNAME"
+else
+  printf_exit "Can not find the env file: $DOCKERMGR_HOME/env/$APPNAME"
+fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Call the dockermgr function
 dockermgr_install
