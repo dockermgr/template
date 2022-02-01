@@ -158,7 +158,7 @@ fi
 if [[ ! -f "/etc/nginx/vhosts.d/$APPNAME.conf" ]] && [[ -f "$INSTDIR/nginx/proxy.conf" ]]; then
   #if __port_not_in_use "$SERVER_PORT"; then
   printf_green "Copying the nginx configuration"
-  __sudo_root cp -Rfv "$APPDIR/nginx/proxy.conf" "/etc/nginx/vhosts.d/$APPNAME.conf"
+  __sudo_root cp -Rfv "$INSTDIR/nginx/proxy.conf" "/etc/nginx/vhosts.d/$APPNAME.conf"
   __sudo_root sed -i "s|REPLACE_APPNAME|$APPNAME|g" "/etc/nginx/vhosts.d/$APPNAME.conf" &>/dev/null
   __sudo_root sed -i "s|REPLACE_NGINX_HTTP|$NGINX_HTTP|g" "/etc/nginx/vhosts.d/$APPNAME.conf" &>/dev/null
   __sudo_root sed -i "s|REPLACE_NGINX_HTTPS|$NGINX_HTTPS|g" "/etc/nginx/vhosts.d/$APPNAME.conf" &>/dev/null
