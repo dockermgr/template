@@ -27,7 +27,8 @@ SERVER_SSL_KEY="${SERVER_SSL_KEY:-$SERVER_SSL_DIR/private/localhost.key}"
 # Setup variables
 SERVER_IP="${CURRIP4:-127.0.0.1}"
 SERVER_LISTEN="${SERVER_LISTEN:-$SERVER_IP}"
-SERVER_HOST="${APPNAME}.$(hostname -d 2>/dev/null | grep '^' || echo local)"
+SERVER_DOMAIN="${SERVER_DOMAIN:-"$(hostname -d 2>/dev/null | grep '^' || echo local)"}"
+SERVER_HOST="${SERVER_HOST:-$APPNAME.$SERVER_DOMAIN}"
 SERVER_TIMEZONE="${TZ:-${TIMEZONE:-America/New_York}}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Setup nginx proxy variables
