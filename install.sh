@@ -158,14 +158,16 @@ fi
 if [[ ! -f "/etc/nginx/vhosts.d/$APPNAME.conf" ]] && [[ -f "$INSTDIR/nginx/proxy.conf" ]]; then
   #if __port_not_in_use "$SERVER_PORT"; then
   printf_green "Copying the nginx configuration"
-  __sudo_root cp -Rfv "$INSTDIR/nginx/proxy.conf" "/etc/nginx/vhosts.d/$APPNAME.conf"
-  __sudo_root sed -i "s|REPLACE_APPNAME|$APPNAME|g" "/etc/nginx/vhosts.d/$APPNAME.conf" &>/dev/null
-  __sudo_root sed -i "s|REPLACE_NGINX_HTTP|$NGINX_HTTP|g" "/etc/nginx/vhosts.d/$APPNAME.conf" &>/dev/null
-  __sudo_root sed -i "s|REPLACE_NGINX_HTTPS|$NGINX_HTTPS|g" "/etc/nginx/vhosts.d/$APPNAME.conf" &>/dev/null
-  __sudo_root sed -i "s|REPLACE_SERVER_PORT|$SERVER_PORT|g" "/etc/nginx/vhosts.d/$APPNAME.conf" &>/dev/null
-  __sudo_root sed -i "s|REPLACE_SERVER_LISTEN|$SERVER_LISTEN|g" "/etc/nginx/vhosts.d/$APPNAME.conf" &>/dev/null
-  __sudo_root sed -i "s|REPLACE_SERVER_HOST|$SERVER_DOMAIN|g" "/etc/nginx/vhosts.d/$APPNAME.conf" &>/dev/null
-  __sudo_root systemctl status nginx | grep -q enabled &>/dev/null && __sudo_root systemctl reload nginx &>/dev/null
+  cp -f "$INSTDIR/nginx/proxy.conf" "/tmp/$$.$APPNAME.conf"
+  sed -i "s|REPLACE_APPNAME|$APPNAME|g" "/tmp/$$.$APPNAME.conf" &>/dev/null
+  sed -i "s|REPLACE_NGINX_HTTP|$NGINX_HTTP|g" "/tmp/$$.$APPNAME.conf" &>/dev/null
+  sed -i "s|REPLACE_NGINX_HTTPS|$NGINX_HTTPS|g" "/tmp/$$.$APPNAME.conf" &>/dev/null
+  sed -i "s|REPLACE_SERVER_PORT|$SERVER_PORT|g" "/tmp/$$.$APPNAME.conf" &>/dev/null
+  sed -i "s|REPLACE_SERVER_LISTEN|$SERVER_LISTEN|g" "/tmp/$$.$APPNAME.conf" &>/dev/null
+  sed -i "s|REPLACE_SERVER_HOST|$SERVER_DOMAIN|g" "/tmp/$$.$APPNAME.conf" &>/dev/null
+  __sudo_root mv -f "/tmp/$$.$APPNAME.conf" "/etc/nginx/vhosts.d/$APPNAME.conf"
+  __sudo_root systemctl status nginx | grep -q enabled &>/dev/null &&
+    __sudo_root systemctl restart nginx &>/dev/null
   #fi
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
