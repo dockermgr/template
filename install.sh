@@ -20,7 +20,6 @@ SRC_DIR="${BASH_SOURCE%/*}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set bash options
 if [[ "$1" == "--debug" ]]; then shift 1 && set -xo pipefail && export SCRIPT_OPTS="--debug" && export _DEBUG="on"; fi
-exit 1 # template
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Import functions
 CASJAYSDEVDIR="${CASJAYSDEVDIR:-/usr/local/share/CasjaysDev/scripts}"
@@ -78,6 +77,10 @@ elif [[ -f "$DOCKERMGR_HOME/env/$APPNAME" ]]; then
   . "$DOCKERMGR_HOME/env/$APPNAME"
 else
   printf_exit "Can not find the env file: $DOCKERMGR_HOME/env/$APPNAME"
+fi
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+if [ -z "$HUB_URL" ] || [ "$HUB_URL" = "hello-world" ]; then
+  printf_exit "Please set the url to the containers image"
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Call the dockermgr function
