@@ -164,6 +164,7 @@ if [[ ! -f "/etc/nginx/vhosts.d/$APPNAME.conf" ]] && [[ -f "$INSTDIR/nginx/proxy
     sed -i "s|REPLACE_NGINX_HTTPS|$NGINX_HTTPS|g" "/etc/nginx/vhosts.d/$APPNAME.conf" &>/dev/null
     sed -i "s|REPLACE_SERVER_PORT|$SERVER_PORT|g" "/etc/nginx/vhosts.d/$APPNAME.conf" &>/dev/null
     sed -i "s|REPLACE_SERVER_LISTEN|$SERVER_LISTEN|g" "/etc/nginx/vhosts.d/$APPNAME.conf" &>/dev/null
+    sed -i "s|REPLACE_SERVER_HOST|$SERVER_DOMAIN|g" "/etc/nginx/vhosts.d/$APPNAME.conf" &>/dev/null
     systemctl status nginx | grep -q enabled &>/dev/null && __sudo_root systemctl reload nginx &>/dev/null
   fi
 fi
