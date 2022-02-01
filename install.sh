@@ -8,19 +8,19 @@
 # @Copyright     : Copyright: (c) 2021 Jason Hempstead, Casjays Developments
 # @Created       : Sunday, Dec 05, 2021 22:12 EST
 # @File          : install.sh
-# @Description   :
+# @Description   : Template.
 # @TODO          :
 # @Other         :
 # @Resource      :
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-APPNAME="GEN_SCRIPT_REPLACE_APPNAME"
+APPNAME="template-file"
 USER="${SUDO_USER:-${USER}}"
 HOME="${USER_HOME:-${HOME}}"
 SRC_DIR="${BASH_SOURCE%/*}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set bash options
 if [[ "$1" == "--debug" ]]; then shift 1 && set -xo pipefail && export SCRIPT_OPTS="--debug" && export _DEBUG="on"; fi
-
+exit 1 # template
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Import functions
 CASJAYSDEVDIR="${CASJAYSDEVDIR:-/usr/local/share/CasjaysDev/scripts}"
@@ -68,16 +68,16 @@ scripts_check
 REPO_BRANCH="${GIT_REPO_BRANCH:-main}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Defaults
-APPNAME="GEN_SCRIPT_REPLACE_APPNAME"
-APPDIR="$HOME/.local/share/srv/docker/GEN_SCRIPT_REPLACE_APPNAME"
-DATADIR="$HOME/.local/share/srv/docker/GEN_SCRIPT_REPLACE_APPNAME/files"
-INSTDIR="$HOME/.local/share/dockermgr/GEN_SCRIPT_REPLACE_APPNAME"
-REPO="${DOCKERMGRREPO:-https://github.com/dockermgr}/GEN_SCRIPT_REPLACE_APPNAME"
+APPNAME="template-file"
+APPDIR="$HOME/.local/share/srv/docker/template-file"
+DATADIR="$HOME/.local/share/srv/docker/template-file/files"
+INSTDIR="$HOME/.local/share/dockermgr/template-file"
+REPO="${DOCKERMGRREPO:-https://github.com/dockermgr}/template-file"
 REPORAW="$REPO/raw/$REPO_BRANCH"
 APPVERSION="$(__appversion "$REPORAW/version.txt")"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # URL to container image [docker pull URL]
-HUB_URL="HubURL/GEN_SCRIPT_REPLACE_APPNAME"
+HUB_URL="REPLACE_HUB_URL"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Directory variables
 SERVER_DATA_DIR=""
@@ -103,18 +103,21 @@ SERVER_PORT_OTHER_INT="${SERVER_PORT_OTHER_INT:-}"
 SERVER_WEB_PORT="${SERVER_WEB_PORT:-$SERVER_PORT}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # SSL Setup
-SERVER_SSL_CA="/etc/ssl/CA/CasjaysDev/certs/ca.crt"
-SERVER_SSL_CRT="/etc/ssl/CA/CasjaysDev/certs/localhost.crt"
-SERVER_SSL_KEY="/etc/ssl/CA/CasjaysDev/private/localhost.key"
-[[ -f "$SERVER_SSL_CRT" ]] && [[ -f "$SERVER_SSL_KEY" ]] && SERVER_SSL="true"
-[[ -n "$SERVER_SSL" ]] || SERVER_SSL="${SERVER_SSL:-false}"
+SERVER_SSLDIR="${SERVER_SSLDIR:-/etc/ssl/CA/CasjaysDev}"
+SERVER_SSL_CA="${SERVER_SSL_CA:-$SERVER_SSLDIR/certs/ca.crt}"
+SERVER_SSL_CRT="${SERVER_SSL_CRT:-$SERVER_SSLDIR/certs/localhost.crt}"
+SERVER_SSL_KEY="${SERVER_SSL_KEY:-$SERVER_SSLDIR/private/localhost.key}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Override global variables
-[[ -f "$HOME/.config/myscripts/dockermgr/env" ]] && . "$HOME/.config/myscripts/dockermgr/env"
+[[ -f "$DOCKERMGR_HOME/env" ]] && . "$DOCKERMGR_HOME/env"
 [[ -f "$APPDIR/env" ]] && . "$APPDIR/env"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Show user info message
+SERVER_MESSAGE_USER=""
+SERVER_MESSAGE_PASS=""
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Show post install message
-SERVER_MESSAGE=""
+SERVER_MESSAGE_POST=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Require a higher version
 dockermgr_req_version "$APPVERSION"
@@ -176,18 +179,16 @@ if cmd_exists docker-compose && [ -f "$INSTDIR/docker-compose.yml" ]; then
     __sudo docker-compose up -d &>/dev/null
   fi
 else
-  if docker ps -a | grep -qsw "$APPNAME"; then
-    __sudo docker stop "$APPNAME" &>/dev/null
-    __sudo docker rm -f "$APPNAME" &>/dev/null
-  fi
+  __sudo docker stop "$APPNAME" &>/dev/null
+  __sudo docker rm -f "$APPNAME" &>/dev/null
   __sudo docker run -d \
     --name="$APPNAME" \
     --hostname "$SERVER_HOST" \
     --restart=always \
     --privileged \
     -e TZ="$SERVER_TIMEZONE" \
-    -v $LOCAL_DATA_DIR:/data \
-    -v $LOCAL_CONFIG_DIR:/config \
+    -v $LOCAL_DATA_DIR:/app/data \
+    -v $LOCAL_CONFIG_DIR:/app/config \
     -p $SERVER_LISTEN:$SERVER_PORT:$SERVER_PORT_INT \
     "$HUB_URL" &>/dev/null
 fi
@@ -209,13 +210,14 @@ fi
 # run post install scripts
 run_postinst() {
   dockermgr_run_post
+  [[ -w "/etc/hosts" ]] || return 0
   if ! grep -sq "$SERVER_HOST" /etc/hosts; then
     if [[ -n "$SERVER_PORT_INT" ]]; then
       if [[ $(hostname -d 2>/dev/null | grep '^') = 'local' ]]; then
-        [[ -w "/etc/hosts" ]] && echo "$SERVER_LISTEN     $APPNAME.local" | sudo tee -a /etc/hosts &>/dev/null
+        echo "$SERVER_LISTEN     $APPNAME.local" | sudo tee -a /etc/hosts &>/dev/null
       else
-        [[ -w "/etc/hosts" ]] && echo "$SERVER_LISTEN     $APPNAME.local" | sudo tee -a /etc/hosts &>/dev/null
-        [[ -w "/etc/hosts" ]] && echo "$SERVER_LISTEN     $SERVER_HOST" | sudo tee -a /etc/hosts &>/dev/null
+        echo "$SERVER_LISTEN     $APPNAME.local" | sudo tee -a /etc/hosts &>/dev/null
+        echo "$SERVER_LISTEN     $SERVER_HOST" | sudo tee -a /etc/hosts &>/dev/null
       fi
     fi
   fi
@@ -230,10 +232,12 @@ dockermgr_install_version
 if docker ps -a | grep -qs "$APPNAME"; then
   printf_blue "DATADIR in $DATADIR"
   printf_cyan "Installed to $INSTDIR"
-  [[ -n "$SERVER_PORT" ]] && printf_blue "Service is running on: $SERVER_IP:$SERVER_PORT"
-  [[ -n "$SERVER_WEB_PORT" ]] && printf_blue "and should be available at: http://$SERVER_LISTEN:$SERVER_WEB_PORT or http://$SERVER_HOST:$SERVER_WEB_PORT"
+  [[ -n "$SERVER_IP" && -n "$SERVER_PORT" ]] && printf_blue "Service is running on: $SERVER_IP:$SERVER_PORT"
+  [[ -n "$SERVER_LISTEN" && -n "$SERVER_WEB_PORT" ]] && printf_blue "and should be available at: http://$SERVER_LISTEN:$SERVER_WEB_PORT or http://$SERVER_HOST:$SERVER_WEB_PORT"
   [[ -z "$SERVER_WEB_PORT" ]] && printf_yellow "This container does not have a web interface"
-  [[ -n "$SERVER_MESSAGE" ]] && printf_red "$SERVER_MESSAGE"
+  [[ -n "$SERVER_MESSAGE_USER" ]] && printf_cyan "Username is:  $SERVER_MESSAGE_USER"
+  [[ -n "$SERVER_MESSAGE_PASS" ]] && printf_purple "Password is:  $SERVER_MESSAGE_PASS"
+  [[ -n "$SERVER_MESSAGE_POST" ]] && printf_green "$SERVER_MESSAGE_POST"
 else
   printf_error "Something seems to have gone wrong with the install"
 fi
