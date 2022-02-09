@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version       : 202112161543-git
-# @Author        : Jason Hempstead
-# @Contact       : jason@casjaysdev.com
-# @License       : WTFPL
-# @ReadME        : install.sh --help
-# @Copyright     : Copyright: (c) 2021 Jason Hempstead, Casjays Developments
-# @Created       : Sunday, Dec 05, 2021 22:12 EST
-# @File          : install.sh
-# @Description   : Template.
-# @TODO          :
-# @Other         :
-# @Resource      :
+##@Version       : GEN_SCRIPT_REPLACE_VERSION
+# @Author        : GEN_SCRIPT_REPLACE_AUTHOR
+# @Contact       : GEN_SCRIPT_REPLACE_EMAIL
+# @License       : GEN_SCRIPT_REPLACE_LICENSE
+# @ReadME        : GEN_SCRIPT_REPLACE_FILENAME --help
+# @Copyright     : GEN_SCRIPT_REPLACE_COPYRIGHT
+# @Created       : GEN_SCRIPT_REPLACE_DATE
+# @File          : GEN_SCRIPT_REPLACE_FILENAME
+# @Description   : GEN_SCRIPT_REPLACE_DESC
+# @TODO          : GEN_SCRIPT_REPLACE_TODO
+# @Other         : GEN_SCRIPT_REPLACE_OTHER
+# @Resource      : GEN_SCRIPT_REPLACE_RES
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-APPNAME="template-file"
+APPNAME="GEN_SCRIPT_REPLACE_APPNAME"
 USER="${SUDO_USER:-${USER}}"
 HOME="${USER_HOME:-${HOME}}"
 SRC_DIR="${BASH_SOURCE%/*}"
@@ -68,16 +68,71 @@ scripts_check
 # Require a higher version
 dockermgr_req_version "$APPVERSION"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Repository variables
+REPO="${DOCKERMGRREPO:-https://github.com/dockermgr}/GEN_SCRIPT_REPLACE_APPNAME"
+APPVERSION="$(__appversion "$REPO/raw/${GIT_REPO_BRANCH:-main}/version.txt")"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Defaults variables
+APPNAME="GEN_SCRIPT_REPLACE_APPNAME"
+INSTDIR="$HOME/.local/share/dockermgr/GEN_SCRIPT_REPLACE_APPNAME"
+APPDIR="$HOME/.local/share/srv/docker/GEN_SCRIPT_REPLACE_APPNAME"
+DATADIR="$HOME/.local/share/srv/docker/GEN_SCRIPT_REPLACE_APPNAME/files"
+DOCKERMGR_HOME="${DOCKERMGR_HOME:-$HOME/.config/myscripts/dockermgr}"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Directory variables for container
+SERVER_SSL_DIR="$DATADIR/ssl"
+SERVER_DATA_DIR="$DATADIR/data"
+SERVER_CONFIG_DIR="$DATADIR/config"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Override container variables
+LOCAL_SSL_DIR="${LOCAL_SSL_DIR:-$SERVER_SSL_DIR}"
+LOCAL_DATA_DIR="${LOCAL_DATA_DIR:-$SERVER_DATA_DIR}"
+LOCAL_CONFIG_DIR="${LOCAL_CONFIG_DIR:-$SERVER_CONFIG_DIR}"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# SSL Setup
+SERVER_SSL_DIR="${SERVER_SSL_DIR:-/etc/ssl/CA/CasjaysDev}"
+SERVER_SSL_CA="${SERVER_SSL_CA:-$SERVER_SSL_DIR/certs/ca.crt}"
+SERVER_SSL_CRT="${SERVER_SSL_CRT:-$SERVER_SSL_DIR/certs/localhost.crt}"
+SERVER_SSL_KEY="${SERVER_SSL_KEY:-$SERVER_SSL_DIR/private/localhost.key}"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Setup variables
+SERVER_IP="${CURRIP4:-127.0.0.1}"
+SERVER_LISTEN="${SERVER_LISTEN:-$SERVER_IP}"
+SERVER_DOMAIN="${SERVER_DOMAIN:-"$(hostname -d 2>/dev/null | grep '^' || echo local)"}"
+SERVER_HOST="${SERVER_HOST:-$APPNAME.$SERVER_DOMAIN}"
+SERVER_TIMEZONE="${TZ:-${TIMEZONE:-America/New_York}}"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Setup nginx proxy variables
+NGINX_HTTP="${NGINX_HTTP:-80}"
+NGINX_HTTPS="${NGINX_HTTPS:-443}"
+NGINX_PORT="${NGINX_HTTPS:-$NGINX_HTTP}"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Port Setup [ _INT is container port ]
+SERVER_PORT="${SERVER_PORT:-}"
+SERVER_PORT_INT="${SERVER_PORT_INT:-}"
+SERVER_PORT_ADMIN="${SERVER_PORT_ADMIN:-}"
+SERVER_PORT_ADMIN_INT="${SERVER_PORT_ADMIN_INT:-}"
+SERVER_PORT_OTHER="${SERVER_PORT_OTHER:-}"
+SERVER_PORT_OTHER_INT="${SERVER_PORT_OTHER_INT:-}"
+SERVER_WEB_PORT="${SERVER_WEB_PORT:-$SERVER_PORT}"
+SERVER_PROXY="${SERVER_PROXY:-https://$SERVER_LISTEN:$SERVER_PORT}"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Show user info message
+SERVER_MESSAGE_USER=""
+SERVER_MESSAGE_PASS=""
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Show post install message
+SERVER_MESSAGE_POST=""
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# URL to container image [docker pull URL]
+HUB_URL="hello-world"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # import global variables
 if [[ -f "$APPDIR/env.sh" ]] && [[ ! -f "$DOCKERMGR_HOME/env/$APPNAME" ]]; then
-  mkdir -p "$DOCKERMGR_HOME/env"
-  cp -f "$APPDIR/env.sh" "$DOCKERMGR_HOME/env/$APPNAME"
-  . "$DOCKERMGR_HOME/env/$APPNAME"
-elif [[ -f "$DOCKERMGR_HOME/env/$APPNAME" ]]; then
-  . "$DOCKERMGR_HOME/env/$APPNAME"
-else
-  printf_exit "Can not find the env file: $DOCKERMGR_HOME/env/$APPNAME"
+  mkdir -p "$DOCKERMGR_HOME/env" &&
+    cp -Rf "$APPDIR/env.sh" "$DOCKERMGR_HOME/env/$APPNAME"
 fi
+[[ -f "$DOCKERMGR_HOME/env/$APPNAME" ]] && . "$DOCKERMGR_HOME/env/$APPNAME"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if [ -z "$HUB_URL" ] || [ "$HUB_URL" = "hello-world" ]; then
   printf_exit "Please set the url to the containers image"
@@ -155,20 +210,16 @@ else
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Install nginx proxy
-if [[ ! -f "/etc/nginx/vhosts.d/$APPNAME.conf" ]] && [[ -f "$INSTDIR/nginx/proxy.conf" ]]; then
-  #if __port_not_in_use "$SERVER_PORT"; then
-  printf_green "Copying the nginx configuration"
-  cp -f "$INSTDIR/nginx/proxy.conf" "/tmp/$$.$APPNAME.conf"
-  sed -i "s|REPLACE_APPNAME|$APPNAME|g" "/tmp/$$.$APPNAME.conf" &>/dev/null
-  sed -i "s|REPLACE_NGINX_HTTP|$NGINX_HTTP|g" "/tmp/$$.$APPNAME.conf" &>/dev/null
-  sed -i "s|REPLACE_NGINX_HTTPS|$NGINX_HTTPS|g" "/tmp/$$.$APPNAME.conf" &>/dev/null
-  sed -i "s|REPLACE_SERVER_PORT|$SERVER_PORT|g" "/tmp/$$.$APPNAME.conf" &>/dev/null
-  sed -i "s|REPLACE_SERVER_LISTEN|$SERVER_LISTEN|g" "/tmp/$$.$APPNAME.conf" &>/dev/null
-  sed -i "s|REPLACE_SERVER_HOST|$SERVER_DOMAIN|g" "/tmp/$$.$APPNAME.conf" &>/dev/null
-  __sudo_root mv -f "/tmp/$$.$APPNAME.conf" "/etc/nginx/vhosts.d/$APPNAME.conf"
-  __sudo_root systemctl status nginx | grep -q enabled &>/dev/null &&
-    __sudo_root systemctl restart nginx &>/dev/null
-  #fi
+if [[ ! -f "/etc/nginx/vhosts.d/$SERVER_HOST.conf" ]] && [[ -f "$INSTDIR/nginx/proxy.conf" ]]; then
+  cp -f "$INSTDIR/nginx/proxy.conf" "/tmp/$$.$SERVER_HOST.conf"
+  sed -i "s|REPLACE_APPNAME|$APPNAME|g" "/tmp/$$.$SERVER_HOST.conf" &>/dev/null
+  sed -i "s|REPLACE_NGINX_PORT|$NGINX_PORT|g" "/tmp/$$.$SERVER_HOST.conf" &>/dev/null
+  sed -i "s|REPLACE_SERVER_PORT|$SERVER_PORT|g" "/tmp/$$.$SERVER_HOST.conf" &>/dev/null
+  sed -i "s|REPLACE_SERVER_HOST|$SERVER_DOMAIN|g" "/tmp/$$.$SERVER_HOST.conf" &>/dev/null
+  sed -i "s|REPLACE_SERVER_PROXY|$SERVER_PROXY|g" "/tmp/$$.$SERVER_HOST.conf" &>/dev/null
+  __sudo_root mv -f "/tmp/$$.$SERVER_HOST.conf" "/etc/nginx/vhosts.d/$SERVER_HOST.conf"
+  [ -f "/etc/nginx/vhosts.d/$SERVER_HOST.conf" ] && printf_green "[ ✅ ] Copying the nginx configuration"
+  systemctl status nginx | grep -q enabled &>/dev/null && __sudo_root systemctl reload nginx &>/dev/null
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # run post install scripts
